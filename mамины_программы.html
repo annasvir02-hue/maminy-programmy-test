@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мамины программы в моей жизни</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4EFF0; --paper:#FCF9FA; --ink:#1E0D12; --ink-soft:#6B4B53;
+  --brd:#7A1F30; --brd-mid:#A85060; --brd-light:#D4A0A8; --brd-pale:#F0E0E3;
+  --sage:#7A9A82; --border:#DDD0D2; --shadow:rgba(30,13,18,0.09);
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:'Jost',sans-serif;font-weight:300;min-height:100vh;
+  display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+.app{width:100%;max-width:760px;position:relative;z-index:1;}
+.screen{display:none;animation:fadeIn 0.5s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* TOAST */
+.save-toast{position:fixed;bottom:20px;right:20px;background:var(--brd);color:#fff;font-size:12px;letter-spacing:0.08em;padding:9px 16px;border-radius:3px;z-index:999;opacity:0;transform:translateY(8px);transition:opacity 0.3s,transform 0.3s;pointer-events:none;}
+.save-toast.show{opacity:1;transform:translateY(0);}
+
+/* RESUME BANNER */
+.resume-banner{background:var(--brd-pale);border:1px solid var(--brd-light);border-radius:3px;padding:14px 20px;margin-bottom:20px;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--ink-soft);display:none;}
+.resume-banner.show{display:flex;}
+.resume-banner strong{color:var(--brd);}
+.resume-banner .actions{display:flex;gap:8px;flex-shrink:0;}
+
+/* INTRO */
+.card{background:var(--paper);border:1px solid var(--border);border-radius:4px;box-shadow:0 4px 40px var(--shadow);}
+.intro-card{padding:60px 52px;text-align:center;}
+.intro-tag{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--brd);margin-bottom:24px;}
+.intro-title{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,5vw,46px);font-weight:300;line-height:1.2;margin-bottom:28px;}
+.intro-title em{font-style:italic;color:var(--brd);}
+.intro-divider{width:48px;height:1px;background:var(--brd);margin:0 auto 28px;}
+.intro-text{font-size:15px;line-height:1.8;color:var(--ink-soft);max-width:480px;margin:0 auto 32px;}
+.intro-note{background:var(--brd-pale);border-left:3px solid var(--brd);padding:16px 20px;border-radius:0 4px 4px 0;font-style:italic;font-size:14px;color:var(--ink-soft);margin-bottom:36px;text-align:left;}
+.intro-meta{font-size:13px;color:var(--ink-soft);margin-bottom:36px;line-height:1.7;}
+.intro-meta strong{color:var(--brd);font-weight:500;}
+
+/* BUTTONS */
+.btn{display:inline-block;padding:14px 38px;background:var(--brd);color:#fff;border:none;border-radius:2px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+.btn:hover{background:#5C1522;transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{background:var(--border);color:var(--ink-soft);cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;color:var(--brd);border:1.5px solid var(--brd);}
+.btn-outline:hover{background:var(--brd-pale);}
+.btn-small{padding:8px 18px;font-size:11px;}
+
+/* QUESTION HEADER */
+.q-header{padding:32px 40px;background:var(--brd-pale);border-bottom:1px solid var(--brd-light);border-radius:4px 4px 0 0;}
+.q-tag{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--brd);margin-bottom:10px;}
+.q-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,30px);font-weight:400;line-height:1.3;color:var(--ink);margin-bottom:14px;}
+.q-intro{font-size:14px;line-height:1.7;color:var(--ink-soft);font-style:italic;}
+
+/* PROGRESS DOTS */
+.progress{display:flex;align-items:center;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.p-dot{width:9px;height:9px;border-radius:50%;background:var(--border);transition:all 0.3s;flex-shrink:0;}
+.p-dot.done{background:var(--sage);}
+.p-dot.active{background:var(--brd);transform:scale(1.35);}
+.p-dot.upcoming{background:var(--border);}
+.p-label{font-size:12px;color:var(--ink-soft);letter-spacing:0.1em;margin-left:auto;}
+
+/* SPHERE BLOCKS */
+.spheres{padding:0;}
+.sphere{padding:24px 40px;border-bottom:1px solid var(--border);transition:background 0.2s;}
+.sphere:last-of-type{border-bottom:none;}
+.sphere:hover{background:#FBF8F8;}
+.sphere-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:500;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.sphere-num{width:22px;height:22px;border-radius:50%;background:var(--brd-pale);color:var(--brd);font-family:'Jost',sans-serif;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sphere-num.filled{background:var(--brd);color:#fff;}
+
+/* CONTEXT BOXES (previous answers shown above current) */
+.ctx{margin-bottom:12px;padding:10px 14px;background:var(--brd-pale);border-left:3px solid var(--brd-light);border-radius:0 3px 3px 0;font-size:13px;line-height:1.6;color:var(--ink-soft);}
+.ctx-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brd);margin-bottom:4px;font-weight:500;font-style:normal;}
+.ctx-text{white-space:pre-wrap;font-style:italic;color:var(--ink);}
+.ctx-text.empty{color:var(--border);font-style:italic;}
+
+textarea{
+  width:100%;min-height:84px;
+  border:1.5px solid var(--border);border-radius:3px;
+  padding:12px 14px;font-family:'Jost',sans-serif;font-size:14px;font-weight:300;
+  color:var(--ink);background:var(--bg);resize:vertical;outline:none;line-height:1.7;
+  transition:border-color 0.2s,background 0.2s;
+}
+textarea:focus{border-color:var(--brd);background:#fff;}
+textarea.has-value{background:#fff;border-color:var(--sage);}
+
+/* FOOTER */
+.footer{padding:22px 40px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);background:#FBF8F8;gap:12px;flex-wrap:wrap;border-radius:0 0 4px 4px;}
+.fill-hint{font-size:12px;color:var(--ink-soft);font-style:italic;}
+.fill-hint span{color:var(--brd);font-weight:500;}
+
+/* REVIEW SCREEN */
+.review-intro{padding:32px 40px;background:var(--brd-pale);border-bottom:1px solid var(--brd-light);border-radius:4px 4px 0 0;text-align:center;}
+.review-tag{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--brd);margin-bottom:12px;}
+.review-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,28px);font-weight:400;color:var(--ink);margin-bottom:12px;}
+.review-text{font-size:14px;line-height:1.7;color:var(--ink-soft);font-style:italic;max-width:480px;margin:0 auto;}
+
+.review-sphere{padding:22px 40px;border-bottom:1px solid var(--border);}
+.review-sphere:last-of-type{border-bottom:none;}
+.review-sphere-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--ink);margin-bottom:14px;}
+.review-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.review-col{}
+.review-col-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brd);margin-bottom:5px;font-weight:500;}
+.review-col-text{font-size:13px;line-height:1.6;color:var(--ink);white-space:pre-wrap;background:var(--bg);padding:10px 12px;border-radius:3px;border-left:3px solid var(--brd-light);min-height:50px;}
+.review-col-text.single{grid-column:1/-1;}
+
+/* DONE */
+.done-card{padding:54px 44px;text-align:center;}
+.done-icon{font-size:38px;margin-bottom:18px;color:var(--brd);}
+.done-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:300;margin-bottom:14px;}
+.done-text{font-size:15px;color:var(--ink-soft);line-height:1.8;max-width:440px;margin:0 auto 32px;}
+.done-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+
+/* RESULTS */
+.results{margin-top:24px;}
+.results-header{padding:24px 40px;background:var(--brd-pale);border-bottom:1px solid var(--brd-light);border-radius:4px 4px 0 0;}
+.results-header h2{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:22px;}
+.r-sphere{border-bottom:1px solid var(--border);}
+.r-sphere:last-child{border-bottom:none;}
+.r-sphere-title{padding:18px 40px;font-family:'Cormorant Garamond',serif;font-size:18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:var(--ink);user-select:none;transition:background 0.15s;}
+.r-sphere-title:hover{background:var(--bg);}
+.r-sphere-title::after{content:'▾';color:var(--brd);font-size:14px;transition:transform 0.2s;}
+.r-sphere-title.collapsed::after{transform:rotate(-90deg);}
+.r-sphere-body{padding:0 40px 22px;display:grid;gap:14px;}
+.r-sphere-body.collapsed{display:none;}
+.r-q-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--brd);margin-bottom:4px;font-weight:500;}
+.r-q-text{font-size:14px;color:var(--ink);line-height:1.7;white-space:pre-wrap;background:var(--bg);padding:10px 13px;border-radius:3px;border-left:3px solid var(--brd-light);}
+.r-q-text.empty{color:var(--border);font-style:italic;border-left-color:var(--border);}
+
+/* RESET */
+.reset-zone{text-align:center;margin-top:18px;}
+.btn-reset{background:none;border:none;font-size:12px;color:var(--ink-soft);cursor:pointer;letter-spacing:0.08em;text-decoration:underline;padding:4px;}
+.btn-reset:hover{color:var(--brd);}
+
+@media print{
+  body{background:#fff;padding:0;}
+  .btn,.progress,.footer,.save-toast,.reset-zone,.q-header,.review-intro{display:none!important;}
+  .results-header{padding:18px 24px;}
+  .r-sphere-body.collapsed{display:grid!important;}
+  .r-sphere-title::after{display:none;}
+  .card{box-shadow:none;border:none;}
+}
+@media (max-width:600px){
+  .intro-card,.done-card{padding:36px 22px;}
+  .q-header,.sphere,.footer,.review-intro,.review-sphere,.results-header,.r-sphere-title,.r-sphere-body{padding-left:22px;padding-right:22px;}
+  .review-pair{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="save-toast" id="save-toast">Сохранено ✓</div>
+
+<div class="app">
+
+<!-- INTRO -->
+<div class="screen active" id="screen-intro">
+  <div class="resume-banner" id="resume-banner">
+    <span>Найден незавершённый прогресс. <strong id="resume-label"></strong></span>
+    <div class="actions">
+      <button class="btn btn-outline btn-small" onclick="clearAndStart()">Заново</button>
+      <button class="btn btn-small" onclick="resume()">Продолжить</button>
+    </div>
+  </div>
+  <div class="card intro-card">
+    <div class="intro-tag">Практика самопознания</div>
+    <h1 class="intro-title">Мамины программы<br><em>в моей жизни</em></h1>
+    <div class="intro-divider"></div>
+    <p class="intro-text">
+      Мы все несём в себе кое-что от мамы. Её страхи, её реакции, её способ смотреть на себя и на мир.<br><br>
+      Иногда это опора. Иногда это то, что мешает жить своей жизнью — а не её продолжением.
+    </p>
+    <div class="intro-note">
+      Отвечай честно — только для себя. Если сделать практику по-настоящему, кое-что может увидеться иначе.
+    </div>
+    <div class="intro-meta">
+      <strong>5 вопросов · 9 сфер жизни</strong><br>
+      Один вопрос — все сферы сразу. Каждый следующий открывается, когда заполнены все 9 полей.
+    </div>
+    <button class="btn" onclick="startFresh()">Начать практику</button>
+  </div>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div class="screen" id="screen-question">
+  <div class="progress" id="progress-bar"></div>
+  <div class="card">
+    <div class="q-header">
+      <div class="q-tag" id="q-tag"></div>
+      <div class="q-title" id="q-title"></div>
+      <div class="q-intro" id="q-intro"></div>
+    </div>
+    <div class="spheres" id="spheres-list"></div>
+    <div class="footer">
+      <div class="fill-hint" id="fill-hint"></div>
+      <button class="btn" id="btn-next" disabled onclick="nextStep()">Дальше →</button>
+    </div>
+  </div>
+  <div class="reset-zone">
+    <button class="btn-reset" onclick="confirmReset()">Сбросить и начать заново</button>
+  </div>
+</div>
+
+<!-- REVIEW SCREEN -->
+<div class="screen" id="screen-review">
+  <div class="progress" id="review-progress"></div>
+  <div class="card">
+    <div class="review-intro">
+      <div class="review-tag" id="review-tag"></div>
+      <div class="review-title" id="review-title"></div>
+      <div class="review-text" id="review-text"></div>
+    </div>
+    <div id="review-body"></div>
+    <div class="footer">
+      <div class="fill-hint">Посмотри. Заметь, что бросается в глаза.</div>
+      <button class="btn" onclick="nextStep()">Продолжить →</button>
+    </div>
+  </div>
+  <div class="reset-zone">
+    <button class="btn-reset" onclick="confirmReset()">Сбросить и начать заново</button>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="screen" id="screen-done">
+  <div class="card done-card">
+    <div class="done-icon">✦</div>
+    <h2 class="done-title">Практика завершена</h2>
+    <p class="done-text">
+      Ты прошла все 5 вопросов по 9 сферам жизни. Это требует честности — и смелости.<br><br>
+      Посмотри на ответы целиком. Иногда паттерн виден только когда видишь всё сразу.
+    </p>
+    <div class="done-actions">
+      <button class="btn btn-outline" onclick="showResults()">Посмотреть всё</button>
+      <button class="btn" onclick="window.print()">Сохранить / Распечатать</button>
+    </div>
+  </div>
+  <div class="card results" id="results-wrap" style="display:none;"></div>
+  <div class="reset-zone">
+    <button class="btn-reset" onclick="confirmReset()">Сбросить и начать заново</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'maminy_programmy_v2';
+
+const SPHERES = [
+  "Отношение к себе как к женщине",
+  "Отношение к мужчинам",
+  "Отношение к сексу",
+  "Отношение к детям",
+  "Реализация и карьера",
+  "Саморазвитие",
+  "Уход за собой и здоровьем",
+  "Отношение к жизни",
+  "Отношение к деньгам",
+];
+
+const QUESTIONS = [
+  {
+    key: 'q1', tag: 'Вопрос 1 из 5',
+    title: 'Как делала / говорила / реагировала мама',
+    intro: 'Вспомни — в каждой сфере жизни как реагировала, как себя вела, что говорила твоя мама. Не оценивай. Просто опиши, как было.',
+    contextKeys: [],
+    contextLabels: {},
+  },
+  {
+    key: 'q2', tag: 'Вопрос 2 из 5',
+    title: 'Как делаю / говорю / реагирую я',
+    intro: 'Теперь — про себя. В тех же сферах. Как ты сейчас? Постарайся быть честной — даже если ответ тебе не нравится.',
+    contextKeys: [],
+    contextLabels: {},
+  },
+  {
+    key: 'q3', tag: 'Вопрос 3 из 5',
+    title: 'Что у нас общего с мамой',
+    intro: 'Посмотри на свои ответы про маму и про себя. Что в них пересекается? Где видна линия — от неё ко мне?',
+    contextKeys: ['q1', 'q2'],
+    contextLabels: { q1: 'Как мама', q2: 'Как я' },
+  },
+  {
+    key: 'q4', tag: 'Вопрос 4 из 5',
+    title: 'Что я взяла от мамы — и это помогает мне в жизни',
+    intro: 'Посмотри на ответы из третьего вопроса — что общего с мамой. Из этого общего: что тебе помогает? За что можешь сказать «спасибо»?',
+    contextKeys: ['q3'],
+    contextLabels: { q3: 'Что общего' },
+  },
+  {
+    key: 'q5', tag: 'Вопрос 5 из 5',
+    title: 'Что я взяла от мамы — и это мешает мне в жизни',
+    intro: 'Снова посмотри на общее с мамой. А что из этого — мешает? Что хочется отдать обратно, перестать носить?',
+    contextKeys: ['q3'],
+    contextLabels: { q3: 'Что общего' },
+  },
+];
+
+// State
+let answers = {};
+QUESTIONS.forEach(q => answers[q.key] = Array(SPHERES.length).fill(''));
+let phase = 'intro';  // intro, q1, q2, review12, q3, review3, q4, q5, done
+const PHASE_ORDER = ['intro','q1','q2','q3','q4','q5','done'];
+
+let saveTimer, toastTimer;
+
+// ── STORAGE ──────────────────────────────────────────
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ phase, answers }));
+      toast();
+    } catch(e) {}
+  }, 600);
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function clearAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  QUESTIONS.forEach(q => answers[q.key] = Array(SPHERES.length).fill(''));
+  phase = 'intro';
+  document.getElementById('resume-banner').classList.remove('show');
+}
+
+function toast() {
+  clearTimeout(toastTimer);
+  const t = document.getElementById('save-toast');
+  t.classList.add('show');
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1700);
+}
+
+// ── INIT ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = loadSaved();
+  if (!saved) return;
+  answers = saved.answers || answers;
+  const savedPhase = saved.phase || 'intro';
+  if (savedPhase !== 'intro') {
+    const banner = document.getElementById('resume-banner');
+    banner.classList.add('show');
+    document.getElementById('resume-label').textContent = phaseLabel(savedPhase);
+    phase = savedPhase;
+  }
+});
+
+function phaseLabel(p) {
+  const map = {
+    q1: 'Вопрос 1', q2: 'Вопрос 2', q3: 'Вопрос 3', q4: 'Вопрос 4', q5: 'Вопрос 5',
+    done: 'Практика завершена',
+  };
+  return map[p] || '';
+}
+
+function startFresh() {
+  clearAll();
+  phase = 'q1';
+  render();
+}
+
+function clearAndStart() {
+  clearAll();
+  render();
+}
+
+function resume() {
+  render();
+}
+
+function confirmReset() {
+  if (confirm('Сбросить весь прогресс и начать заново?')) {
+    clearAll();
+    document.getElementById('results-wrap').style.display = 'none';
+    render();
+  }
+}
+
+// ── PHASE NAVIGATION ─────────────────────────────────
+function nextStep() {
+  const idx = PHASE_ORDER.indexOf(phase);
+  phase = PHASE_ORDER[idx + 1];
+  save();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function render() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  if (phase === 'intro') {
+    document.getElementById('screen-intro').classList.add('active');
+    return;
+  }
+  if (phase === 'done') {
+    document.getElementById('screen-done').classList.add('active');
+    return;
+  }
+  if (phase === 'review12') {
+    renderReview({
+      tag: 'Пауза · перед вопросом 3',
+      title: 'Посмотри, что получилось',
+      text: 'Слева — твоя мама. Справа — ты. Прочитай в спокойствии. Где совпадает? Где наоборот? Где вообще не похоже?',
+      cols: [
+        { key: 'q1', label: 'Как мама' },
+        { key: 'q2', label: 'Как я' },
+      ],
+    });
+    return;
+  }
+  if (phase === 'review3') {
+    renderReview({
+      tag: 'Пауза · перед вопросом 4',
+      title: 'Что общего получилось',
+      text: 'Это то, что ты несёшь от мамы. Дальше будем смотреть — что из этого помогает, а что мешает.',
+      cols: [
+        { key: 'q3', label: 'Что общего с мамой' },
+      ],
+    });
+    return;
+  }
+  // it's a question phase
+  renderQuestion(phase);
+}
+
+// ── PROGRESS BAR ─────────────────────────────────────
+function renderProgress(target) {
+  const stages = ['q1','q2','review12','q3','review3','q4','q5'];
+  const curIdx = stages.indexOf(phase);
+  const dotMap = ['q1','q2','q3','q4','q5'];  // 5 dots for 5 questions
+  const html = dotMap.map(q => {
+    const qIdx = stages.indexOf(q);
+    let cls = 'p-dot upcoming';
+    const allFilled = answers[q].every(v => v.trim().length > 0);
+    if (allFilled) cls = 'p-dot done';
+    if (phase === q) cls = 'p-dot active';
+    return `<div class="${cls}" title="${QUESTIONS.find(x=>x.key===q).title}"></div>`;
+  }).join('');
+  const lbl = phaseLabel(phase) || '';
+  document.querySelectorAll('#progress-bar, #review-progress').forEach(el => {
+    el.innerHTML = html + `<span class="p-label">${lbl}</span>`;
+  });
+}
+
+// ── RENDER QUESTION ──────────────────────────────────
+function renderQuestion(qKey) {
+  const q = QUESTIONS.find(x => x.key === qKey);
+  document.getElementById('screen-question').classList.add('active');
+
+  renderProgress();
+
+  document.getElementById('q-tag').textContent = q.tag;
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-intro').textContent = q.intro;
+
+  const list = document.getElementById('spheres-list');
+  list.innerHTML = SPHERES.map((sphere, si) => {
+    const val = answers[qKey][si] || '';
+    const filled = val.trim().length > 0;
+
+    let ctxHtml = '';
+    q.contextKeys.forEach(ck => {
+      const ctxVal = answers[ck][si] || '';
+      const label = q.contextLabels[ck];
+      ctxHtml += `
+        <div class="ctx">
+          <div class="ctx-label">${label}</div>
+          <div class="ctx-text ${ctxVal.trim() ? '' : 'empty'}">${escapeHtml(ctxVal.trim()) || '— не заполнено —'}</div>
+        </div>`;
+    });
+
+    return `
+      <div class="sphere">
+        <div class="sphere-name">
+          <span class="sphere-num ${filled ? 'filled' : ''}" id="num-${qKey}-${si}">${si + 1}</span>
+          ${sphere}
+        </div>
+        ${ctxHtml}
+        <textarea
+          placeholder="Напиши здесь..."
+          class="${filled ? 'has-value' : ''}"
+          data-q="${qKey}" data-si="${si}"
+          oninput="onInput(this)"
+        >${escapeHtml(val)}</textarea>
+      </div>`;
+  }).join('');
+
+  checkAllFilled(qKey);
+}
+
+function onInput(ta) {
+  const qKey = ta.dataset.q;
+  const si = parseInt(ta.dataset.si);
+  answers[qKey][si] = ta.value;
+  const numEl = document.getElementById(`num-${qKey}-${si}`);
+  if (ta.value.trim()) {
+    ta.classList.add('has-value');
+    numEl.classList.add('filled');
+  } else {
+    ta.classList.remove('has-value');
+    numEl.classList.remove('filled');
+  }
+  checkAllFilled(qKey);
+  save();
+}
+
+function checkAllFilled(qKey) {
+  const filled = answers[qKey].filter(v => v.trim().length > 0).length;
+  const total = SPHERES.length;
+  const allDone = filled === total;
+  const btn = document.getElementById('btn-next');
+  btn.disabled = !allDone;
+
+  const hint = document.getElementById('fill-hint');
+  if (allDone) {
+    hint.innerHTML = '<span>Все 9 сфер заполнены</span> — можно двигаться дальше';
+    btn.textContent = qKey === 'q5' ? 'Завершить ✓' : 'Дальше →';
+  } else {
+    hint.innerHTML = `Заполнено <span>${filled} из ${total}</span> сфер`;
+  }
+}
+
+// ── RENDER REVIEW ────────────────────────────────────
+function renderReview(cfg) {
+  document.getElementById('screen-review').classList.add('active');
+  renderProgress();
+
+  document.getElementById('review-tag').textContent = cfg.tag;
+  document.getElementById('review-title').textContent = cfg.title;
+  document.getElementById('review-text').textContent = cfg.text;
+
+  const body = document.getElementById('review-body');
+  body.innerHTML = SPHERES.map((sphere, si) => {
+    const cols = cfg.cols.map(col => {
+      const v = (answers[col.key][si] || '').trim();
+      return `
+        <div class="review-col${cfg.cols.length === 1 ? ' single' : ''}">
+          <div class="review-col-label">${col.label}</div>
+          <div class="review-col-text">${escapeHtml(v) || '<em style="color:var(--border)">— не заполнено —</em>'}</div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="review-sphere">
+        <div class="review-sphere-name">${si + 1}. ${sphere}</div>
+        <div class="review-pair">${cols}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── RESULTS ──────────────────────────────────────────
+function showResults() {
+  const wrap = document.getElementById('results-wrap');
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <div class="results-header"><h2>Мамины программы в моей жизни</h2></div>
+    ${SPHERES.map((sphere, si) => {
+      const qs = QUESTIONS.map(q => {
+        const v = (answers[q.key][si] || '').trim();
+        return `
+          <div>
+            <div class="r-q-label">${q.title}</div>
+            <div class="r-q-text${!v ? ' empty' : ''}">${escapeHtml(v) || '— не заполнено —'}</div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="r-sphere">
+          <div class="r-sphere-title" onclick="toggleSphere(this)">${si + 1}. ${sphere}</div>
+          <div class="r-sphere-body">${qs}</div>
+        </div>`;
+    }).join('')}`;
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleSphere(el) {
+  el.classList.toggle('collapsed');
+  el.nextElementSibling.classList.toggle('collapsed');
+}
+
+// ── UTIL ─────────────────────────────────────────────
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
